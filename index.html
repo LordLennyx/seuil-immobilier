@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seuil Immobilier — Louer et acheter à Douala</title>
+<meta name="description" content="Annonces immobilières vérifiées à Douala : carte interactive, filtres, plans, simulateur de budget et demande de visite.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 24V14l8-6 8 6v10' fill='none' stroke='%23ff5a1f' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f5f2ec;--ink:#111;--acc:#ff5a1f;--mute:#76726b;--line:#e2ddd3;--card:#fff;--land:#ece6d9;--water:#bcd3d6;--road:#fff;--green:#d5dfc4}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 14.5px/1.45 'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+h1,h2,h3,.bric{font-family:'Bricolage Grotesque';letter-spacing:-.02em}
+.top{height:64px;display:flex;align-items:center;gap:18px;padding:0 22px;border-bottom:1px solid var(--line);background:var(--bg)}
+.logo{display:flex;align-items:center;gap:9px;font:700 21px 'Bricolage Grotesque';letter-spacing:-.04em}
+.logo svg{width:28px;height:28px}
+.tx{display:flex;background:#e9e4da;border-radius:100px;padding:3px}
+.tx button{border:0;background:none;padding:7px 16px;border-radius:100px;font-weight:600;font-size:13.5px;color:var(--mute)}
+.tx button.on{background:var(--ink);color:#fff}
+.fl{display:flex;gap:8px;flex:1;overflow-x:auto;scrollbar-width:none}
+.fl select,.fl .chip{height:38px;border:1px solid var(--line);background:var(--card);border-radius:100px;padding:0 14px;font-size:13.5px;font-weight:500;white-space:nowrap}
+.fl .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fav-b{height:38px;border-radius:100px;border:1px solid var(--line);background:var(--card);padding:0 14px;font-weight:600;font-size:13.5px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.fav-b b{background:var(--acc);color:#fff;border-radius:100px;padding:0 7px;font-size:12px}
+.main{display:grid;grid-template-columns:minmax(420px,46%) 1fr;height:calc(100vh - 64px)}
+.list{overflow-y:auto;padding:18px 22px 40px}
+.lh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.lh h1{font-size:26px;font-weight:600}
+.lh select{border:0;background:none;font-weight:600;font-size:13.5px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 16px}
+.card{cursor:pointer;border-radius:16px;transition:.2s}
+.ph{aspect-ratio:4/3;border-radius:14px;overflow:hidden;position:relative;background:#ddd}
+.ph svg{width:100%;height:100%;display:block;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.card:hover .ph svg,.card.hl .ph svg{transform:scale(1.04)}
+.card.hl .ph{outline:2.5px solid var(--acc);outline-offset:2px}
+.tag{position:absolute;left:10px;top:10px;background:#fff;border-radius:100px;padding:3px 10px;font-size:11.5px;font-weight:600}
+.tag.new{background:var(--acc);color:#fff}
+.heart{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:50%;border:0;background:#ffffffd9;display:grid;place-items:center}
+.heart svg{width:17px;height:17px;transform:none!important}
+.heart.on svg path{fill:var(--acc);stroke:var(--acc)}
+.ci{padding:10px 2px 0}
+.ci .pr{font:700 18px 'Bricolage Grotesque';letter-spacing:-.02em}
+.ci .pr small{font:500 13px 'Instrument Sans';color:var(--mute)}
+.ci .t{font-weight:500;margin:1px 0 4px}
+.ci .s{color:var(--mute);font-size:13px;display:flex;gap:10px}
+.empty{padding:60px 0;text-align:center;color:var(--mute)}
+/* carte */
+.map{position:relative;overflow:hidden;background:var(--land);cursor:grab}
+.map.drag{cursor:grabbing}
+.map>svg{position:absolute;inset:0;width:100%;height:100%}
+.pin{cursor:pointer}
+.pin rect{fill:#fff;stroke:#111;stroke-width:1.2;transition:.15s}
+.pin text{font:700 12.5px 'Instrument Sans';fill:#111;pointer-events:none}
+.pin.on rect,.pin:hover rect{fill:#111}.pin.on text,.pin:hover text{fill:#fff}
+.pin.fav rect{stroke:var(--acc);stroke-width:2}
+.dist{font:600 11px 'Instrument Sans';fill:#8c867a;letter-spacing:.14em;text-transform:uppercase;pointer-events:none}
+.zoom{position:absolute;right:16px;top:16px;display:grid;background:#fff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);overflow:hidden}
+.zoom button{width:40px;height:40px;border:0;background:#fff;font-size:20px}
+.zoom button+button{border-top:1px solid var(--line)}
+.legend{position:absolute;left:16px;bottom:16px;background:#fff;border-radius:12px;padding:10px 14px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.1);display:flex;gap:14px;align-items:center}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.search-area{position:absolute;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:#fff;border:0;border-radius:100px;padding:9px 16px;font-weight:600;font-size:13px;box-shadow:0 6px 16px rgba(0,0,0,.2);display:none}
+/* fiche */
+.sheet{position:fixed;inset:0;z-index:20;display:flex;justify-content:flex-end;pointer-events:none}
+.sheet .veil{position:absolute;inset:0;background:rgba(17,17,17,.35);opacity:0;transition:.3s}
+.sheet .pan{position:relative;width:min(760px,100%);height:100%;background:var(--bg);overflow-y:auto;transform:translateX(100%);transition:.4s cubic-bezier(.2,.8,.2,1)}
+.sheet.on{pointer-events:auto}.sheet.on .veil{opacity:1}.sheet.on .pan{transform:none}
+.close{position:sticky;top:14px;margin:14px 14px -54px auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:0;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:2;font-size:18px}
+.hero{aspect-ratio:16/8;overflow:hidden}.hero svg{width:100%;height:100%;display:block}
+.fc{padding:26px 34px 50px}
+.fc .pr{font:700 34px 'Bricolage Grotesque';letter-spacing:-.03em}
+.fc .pr small{font:500 16px 'Instrument Sans';color:var(--mute)}
+.fc h2{font-size:24px;font-weight:600;margin:4px 0 2px}
+.fc .ad{color:var(--mute)}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:14px;margin:22px 0;background:#fff}
+.facts div{padding:14px;border-right:1px solid var(--line)}.facts div:last-child{border:0}
+.facts b{font:600 20px 'Bricolage Grotesque';display:block}.facts span{font-size:12.5px;color:var(--mute)}
+.fc h3{font-size:18px;font-weight:600;margin:26px 0 10px}
+.feat{display:flex;flex-wrap:wrap;gap:8px}
+.feat span{background:#fff;border:1px solid var(--line);border-radius:100px;padding:5px 12px;font-size:13px}
+.plan{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.plan svg{width:100%;height:auto;display:block}
+.plan text{font:500 11px 'Instrument Sans';fill:#444}
+.plan .ar{font-size:9.5px;fill:#999}
+.sim{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.sim label{display:grid;gap:5px;font-size:13px;color:var(--mute)}
+.sim label b{color:var(--ink);font-weight:600}
+input[type=range]{accent-color:var(--ink);width:100%}
+.res{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:12px;padding:14px 16px}
+.res b{font:700 24px 'Bricolage Grotesque'}
+.bar2{grid-column:1/-1;height:10px;border-radius:6px;overflow:hidden;display:flex;gap:2px}
+.bar2 i{display:block;height:100%}
+.visit{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#111;color:#fff;border-radius:18px;padding:20px}
+.visit h3{grid-column:1/-1;margin:0;color:#fff}
+.visit input,.visit select{height:44px;border-radius:10px;border:0;padding:0 12px;background:#262626;color:#fff}
+.visit button{grid-column:1/-1;height:48px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:600;font-size:15px}
+.slots{grid-column:1/-1;display:flex;gap:6px;overflow-x:auto}
+.slots button{grid-column:auto;flex:none;height:auto;background:#262626;padding:8px 12px;font-size:13px;font-weight:500;border-radius:10px;line-height:1.3}
+.slots button.on{background:#fff;color:#111}
+.agent{display:flex;align-items:center;gap:12px;margin-top:22px}
+.agent i{width:46px;height:46px;border-radius:50%;background:var(--acc);display:grid;place-items:center;color:#fff;font:700 17px 'Bricolage Grotesque';font-style:normal}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:500;transition:.35s;z-index:40}
+.toast.on{transform:translate(-50%,0)}
+.mtog{display:none}
+@media (max-width:900px){body{overflow:auto}.top{flex-wrap:wrap;height:auto;padding:10px 14px;gap:10px}.fl{order:3;flex-basis:100%}.main{grid-template-columns:1fr;height:auto}.map{height:58vh;order:-1}.list{padding:14px}.grid{gap:14px 10px}.facts{grid-template-columns:1fr 1fr}.facts div:nth-child(2){border-right:0}.facts div:nth-child(-n+2){border-bottom:1px solid var(--line)}.sim{grid-template-columns:1fr}.fc{padding:20px}.visit{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="logo"><svg viewBox="0 0 28 28"><rect width="28" height="28" rx="8"/><path d="M7 21V12l7-5 7 5v9" fill="none" stroke="#ff5a1f" stroke-width="2.6"/></svg>seuil</div>
+  <div class="tx" id="tx"><button data-v="location" class="on">Louer</button><button data-v="vente">Acheter</button></div>
+  <div class="fl">
+    <select id="fType" aria-label="Type de bien"><option value="">Tous les biens</option><option>Appartement</option><option>Studio</option><option>Villa</option><option>Duplex</option><option>Bureau</option></select>
+    <select id="fBud" aria-label="Budget"></select>
+    <select id="fCh" aria-label="Chambres"><option value="0">Chambres</option><option value="1">1 ch. et +</option><option value="2">2 ch. et +</option><option value="3">3 ch. et +</option><option value="4">4 ch. et +</option></select>
+    <button class="chip" data-f="meublé">Meublé</button><button class="chip" data-f="groupe électrogène">Groupe électrogène</button><button class="chip" data-f="forage">Forage</button><button class="chip" data-f="piscine">Piscine</button>
+  </div>
+  <button class="fav-b" id="favB">Favoris <b id="favN">0</b></button>
+</div>
+<div class="main">
+  <div class="list" id="list">
+    <div class="lh"><h1 id="count"></h1><select id="sort" aria-label="Trier"><option value="rec">Plus récents</option><option value="asc">Prix croissant</option><option value="desc">Prix décroissant</option><option value="m2">Prix au m²</option></select></div>
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="map" id="map">
+    <svg id="msvg" viewBox="150 0 820 760" preserveAspectRatio="xMidYMid meet"><g id="world"></g></svg>
+    <button class="search-area" id="areaB">Rechercher dans cette zone</button>
+    <div class="zoom"><button id="zin" aria-label="Zoomer">+</button><button id="zout" aria-label="Dézoomer">−</button></div>
+    <div class="legend"><span><i style="background:var(--green)"></i>Espaces verts</span><span><i style="background:var(--water)"></i>Wouri</span><span id="zoneInfo"></span></div>
+  </div>
+</div>
+<div class="sheet" id="sheet"><div class="veil" id="veil"></div><div class="pan" id="pan"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let seed=11;const R=()=>(seed=(seed*16807)%2147483647)/2147483647,pick=a=>a[Math.floor(R()*a.length)];
+const F=n=>Math.round(n).toLocaleString('fr-FR').replace(/ /g,' ');
+// ——— Quartiers (coordonnées sur la carte stylisée) ———
+const Q={'Bonanjo':[300,470,1.5],'Akwa':[380,360,1.35],'Bonapriso':[360,560,1.45],'Deïdo':[450,250,1],'Bali':[440,450,1.15],'Makepe':[690,250,1.05],'Bonamoussadi':[720,150,1.1],'Kotto':[800,235,.95],'Logpom':[770,355,.85],'Logbessou':[840,105,.75],'Ndogbong':[590,420,.85],'Bépanda':[560,300,.8]};
+const TYPES={Appartement:[2,3],Studio:[0,0],Villa:[3,5],Duplex:[3,4],Bureau:[0,0]};
+const RUES=['rue Joss','boulevard de la Liberté','rue Njo-Njo','rue Tokoto','avenue de Gaulle','rue Koloko','carrefour Ange Raphaël','rue Pau','rue Drouot','rue des Écoles'];
+const FEATS=['meublé','groupe électrogène','forage','gardien 24 h/24','parking','climatisation','piscine','balcon','ascenseur','fibre optique','cuisine équipée','jardin'];
+const PAL=[['#e9c46a','#f4e3b1'],['#e76f51','#f5c6b8'],['#8ab17d','#d4e4c8'],['#a3b8cc','#dde6ee'],['#d4a373','#efdcc6'],['#cdb4db','#ece1f2'],['#f1f1ee','#ffffff']];
+const ADJ={Appartement:['lumineux','traversant','neuf','avec vue','calme'],Studio:['moderne','meublé','fonctionnel'],Villa:['contemporaine','avec jardin','familiale','de standing'],Duplex:['spacieux','avec terrasse','neuf'],Bureau:['open space','en centre d\'affaires','clé en main']};
+const L=[];
+Object.entries(Q).forEach(([q,[x,y,k]])=>{const n=q==='Akwa'||q==='Bonapriso'||q==='Makepe'?4:q==='Bonamoussadi'||q==='Bonanjo'?3:2;for(let i=0;i<n;i++){
+  const type=pick(q==='Bonanjo'||q==='Akwa'?['Appartement','Bureau','Studio','Appartement']:['Appartement','Studio','Villa','Duplex','Appartement']),[a,b]=TYPES[type],ch=a+Math.floor(R()*(b-a+1));
+  const tr=R()<.68?'location':'vente',surf=type==='Studio'?28+R()*14:type==='Bureau'?60+R()*180:type==='Villa'?180+R()*240:type==='Duplex'?150+R()*110:55+ch*22+R()*25;
+  const m2=(tr==='location'?1700:520000)*k*(type==='Villa'?.9:type==='Bureau'?1.3:1)*(.85+R()*.3);let pr=surf*m2;pr=tr==='location'?Math.round(pr/5000)*5000:Math.round(pr/1e6)*1e6;
+  const fs=FEATS.filter(()=>R()<.33);if(type==='Villa'&&!fs.includes('jardin'))fs.push('jardin');
+  L.push({id:L.length,q,type,tr,ch,surf:Math.round(surf),pr,sdb:Math.max(1,Math.ceil(ch/2)),fs,rue:pick(RUES),pal:pick(PAL),x:x+(R()-.5)*120,y:y+(R()-.5)*90,et:type==='Villa'?0:Math.floor(R()*6),adj:pick(ADJ[type]),age:Math.floor(R()*30),seed:Math.floor(R()*1e6)})}});
+for(let it=0;it<80;it++)for(const a of L)for(const b of L){if(a===b)continue;const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)<66&&Math.abs(dy)<30){const px=(66-Math.abs(dx))/2*(dx<0?-1:1)*.5,py=(30-Math.abs(dy))/2*(dy<0?-1:1)*.5;if(66-Math.abs(dx)<30-Math.abs(dy)){a.x-=px;b.x+=px}else{a.y-=py;b.y+=py}}}
+L.forEach(l=>l.titre=`${l.type}${l.ch?' '+(l.ch+1)+' pièces':''} ${l.adj}`);
+
+// ——— Illustration procédurale de façade ———
+function facade(l,w=400,h=300){let s=l.seed;const r=()=>(s=(s*16807)%2147483647)/2147483647;const[c1,c2]=l.pal,sky=r()<.5?'#f6e7d3':'#dfe9ec';
+  const floors=l.type==='Villa'?2:l.type==='Studio'?3+Math.floor(r()*3):l.type==='Bureau'?6:2+Math.floor(r()*4),bw=l.type==='Villa'?w*.62:w*(.38+r()*.18),fh=Math.min(46,(h*.72)/floors),bh=fh*floors,bx=(w-bw)/2,by=h*.86-bh;
+  let o=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${l.titre}"><rect width="${w}" height="${h}" fill="${sky}"/><circle cx="${w*.8}" cy="${h*.22}" r="${h*.09}" fill="#fff" opacity=".7"/>`;
+  o+=`<rect x="0" y="${h*.86}" width="${w}" height="${h*.14}" fill="#cfc6b4"/>`;
+  // palmiers / arbres
+  for(let i=0;i<2;i++){const tx=i?w*.88:w*.1,th=h*(.35+r()*.15);o+=`<path d="M${tx} ${h*.86}q${3} ${-th/2} ${-2} ${-th}" stroke="#7a5c3e" stroke-width="4" fill="none"/>`;for(let k=0;k<5;k++){const a=-2.6+k*.55;o+=`<path d="M${tx-2} ${h*.86-th}q${Math.cos(a)*22} ${Math.sin(a)*22-8} ${Math.cos(a)*42} ${Math.sin(a)*30+10}" stroke="#4f7a4a" stroke-width="5" fill="none" stroke-linecap="round"/>`}}
+  o+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="${c1}"/><rect x="${bx-6}" y="${by-6}" width="${bw+12}" height="8" fill="#2b2b2b" opacity=".85"/>`;
+  if(l.type==='Villa')o+=`<path d="M${bx-14} ${by}L${w/2} ${by-48}L${bx+bw+14} ${by}Z" fill="#8b3d2b"/>`;
+  const cols=Math.max(2,Math.floor(bw/38)),cw=bw/cols;
+  for(let f=0;f<floors;f++)for(let c=0;c<cols;c++){const wx=bx+c*cw+cw*.2,wy=by+f*fh+fh*.2,ww=cw*.6,wh=fh*.55,lit=r()<.3;
+    if(f===floors-1&&c===Math.floor(cols/2)){o+=`<rect x="${wx}" y="${wy}" width="${ww}" height="${fh*.8}" fill="#3b2f2a"/>`;continue}
+    o+=`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="${lit?'#ffe9a8':c2}" stroke="#2b2b2b" stroke-opacity=".25"/>`;
+    if(l.type!=='Bureau'&&r()<.4)o+=`<rect x="${wx-4}" y="${wy+wh}" width="${ww+8}" height="4" fill="#2b2b2b" opacity=".6"/>`;
+    if(r()<.15)o+=`<rect x="${wx+ww-12}" y="${wy+4}" width="10" height="7" fill="#f5f5f5" stroke="#999" stroke-width=".6"/>`}
+  if(l.fs.includes('piscine'))o+=`<rect x="${w*.06}" y="${h*.9}" width="${w*.3}" height="${h*.06}" rx="4" fill="#7fc8d6"/>`;
+  return o+'</svg>'}
+
+// ——— Plan procédural ———
+function plan(l){const rooms=['Séjour','Cuisine'];for(let i=1;i<=l.ch;i++)rooms.push('Chambre '+i);for(let i=1;i<=l.sdb;i++)rooms.push(i===1?'Salle d\'eau':'Salle d\'eau '+i);if(l.type==='Studio')rooms.splice(0,2,'Pièce de vie','Kitchenette');if(l.type==='Bureau')rooms.splice(0,rooms.length,'Open space','Salle de réunion','Bureau direction','Kitchenette','Sanitaires');
+  const W=600,H=Math.round(600*.62),area=l.surf;let s=l.seed;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+  const wts=rooms.map(n=>/Séjour|Open|vie/.test(n)?3.2:/Chambre 1|réunion|direction/.test(n)?1.6:/Chambre/.test(n)?1.3:/Cuisine|Kitchen/.test(n)?1:.65);
+  const out=[];(function split(items,x,y,w,h){if(items.length===1){out.push({...items[0],x,y,w,h});return}const tot=items.reduce((a,b)=>a+b.w,0);let acc=0,i=0;while(i<items.length-1&&acc+items[i].w<tot/2){acc+=items[i].w;i++}if(!i){acc=items[0].w;i=1}const f=acc/tot;
+    if(w>=h){split(items.slice(0,i),x,y,w*f,h);split(items.slice(i),x+w*f,y,w*(1-f),h)}else{split(items.slice(0,i),x,y,w,h*f);split(items.slice(i),x,y+h*f,w,h*(1-f))}})(rooms.map((n,i)=>({n,w:wts[i]})),0,0,W,H);
+  const k=area/(W*H);
+  return `<svg viewBox="-12 -12 ${W+24} ${H+24}" role="img" aria-label="Plan indicatif"><rect x="0" y="0" width="${W}" height="${H}" fill="#fbfaf7"/>`+out.map(o=>{const m2=Math.round(o.w*o.h*k),wet=/eau|Sanit/.test(o.n);
+    return `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="${wet?'#eef4f6':/Séjour|Open|vie/.test(o.n)?'#fdf3ea':'#fbfaf7'}" stroke="#222" stroke-width="5"/><line x1="${o.x+o.w*.3}" y1="${o.y+o.h-2.5}" x2="${o.x+o.w*.3+Math.min(34,o.w*.3)}" y2="${o.y+o.h-2.5}" stroke="#fbfaf7" stroke-width="6"/><path d="M${o.x+o.w*.3} ${o.y+o.h-3}a${Math.min(34,o.w*.3)} ${Math.min(34,o.w*.3)} 0 0 1 ${Math.min(34,o.w*.3)} ${-Math.min(34,o.w*.3)}" fill="none" stroke="#bbb" stroke-width="1"/><text x="${o.x+o.w/2}" y="${o.y+o.h/2}" text-anchor="middle">${o.n}</text><text class="ar" x="${o.x+o.w/2}" y="${o.y+o.h/2+14}" text-anchor="middle">${m2} m²</text>`}).join('')+`<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="#111" stroke-width="9"/></svg>`}
+
+// ——— Carte stylisée ———
+function drawMap(){let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;let g='';
+  g+=`<path d="M-500 -500H1500V1300H-500Z" fill="var(--water)"/><path d="M228 -500H1500V1300H340L330 760C300 700 250 660 262 600C275 540 235 500 240 440C246 380 200 340 215 280C230 220 260 160 235 90L228 -500Z" fill="var(--land)"/>`;
+  // îlots de verdure
+  [[520,560,70],[640,600,50],[900,520,80],[300,170,40],[960,300,40],[600,140,45]].forEach(([x,y,rr])=>g+=`<ellipse cx="${x}" cy="${y}" rx="${rr}" ry="${rr*.65}" fill="var(--green)"/>`);
+  // trame de rues fine
+  for(let i=0;i<110;i++){const x=260+r()*900,y=-200+r()*1160,a=r()*Math.PI,l=40+r()*120;g+=`<line x1="${x}" y1="${y}" x2="${x+Math.cos(a)*l}" y2="${y+Math.sin(a)*l}" stroke="#fff" stroke-width="2" opacity=".7"/>`}
+  // grands axes
+  ['M250 470C350 440 470 455 600 420S860 370 1000 380L1500 370','M380 360C430 300 520 270 690 250S900 200 1000 160L1500 -40','M430 1300L440 760C450 620 440 520 450 450S470 300 450 0L452 -500','M600 420C640 520 700 640 760 760L860 1300','M690 250C700 180 720 120 760 0L820 -500'].forEach(d=>g+=`<path d="${d}" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#e8dfcd" stroke-width="1" stroke-dasharray="6 8"/>`);
+  g+=`<path d="M205 395C140 390 90 405 0 420" stroke="#fff" stroke-width="8" fill="none"/><text x="160" y="384" class="dist" style="fill:#5d8186">Pont du Wouri</text><text x="168" y="250" class="dist" style="fill:#5d8186;font-size:15px">Wouri</text>`;
+  Object.entries(Q).forEach(([q,[x,y]])=>g+=`<text class="dist" x="${x}" y="${y-38}" text-anchor="middle">${q}</text>`);
+  g+='<g id="pins"></g>';$('#world').innerHTML=g}
+
+// ——— État & filtres ———
+const S={tr:'location',type:'',bud:0,ch:0,fs:new Set(),sort:'rec',fav:new Set(JSON.parse(localStorage.getItem('seuil-fav')||'[]')),favOnly:false,hl:null,area:null};
+const BUD={location:[[0,'Budget'],[150000,'≤ 150 000 F / mois'],[300000,'≤ 300 000 F / mois'],[600000,'≤ 600 000 F / mois'],[1200000,'≤ 1 200 000 F / mois']],vente:[[0,'Budget'],[50e6,'≤ 50 M F'],[100e6,'≤ 100 M F'],[200e6,'≤ 200 M F'],[400e6,'≤ 400 M F']]};
+function budOpts(){$('#fBud').innerHTML=BUD[S.tr].map(([v,t])=>`<option value="${v}">${t}</option>`).join('');S.bud=0}
+const prix=l=>l.tr==='location'?`${F(l.pr)} F <small>/ mois</small>`:`${l.pr>=1e6?F(l.pr/1e6)+' M':F(l.pr)} F <small>· ${F(l.pr/l.surf)} F/m²</small>`;
+function filtered(){let a=L.filter(l=>l.tr===S.tr&&(!S.type||l.type===S.type)&&(!S.bud||l.pr<=S.bud)&&l.ch>=S.ch&&[...S.fs].every(f=>l.fs.includes(f))&&(!S.favOnly||S.fav.has(l.id))&&(!S.area||(l.x>S.area[0]&&l.x<S.area[2]&&l.y>S.area[1]&&l.y<S.area[3])));
+  return a.sort((x,y)=>S.sort==='asc'?x.pr-y.pr:S.sort==='desc'?y.pr-x.pr:S.sort==='m2'?x.pr/x.surf-y.pr/y.surf:x.age-y.age)}
+function render(){const a=filtered();$('#count').textContent=`${a.length} bien${a.length>1?'s':''} ${S.tr==='location'?'à louer':'à vendre'}`;
+  $('#grid').innerHTML=a.length?a.map(l=>`<article class="card" data-id="${l.id}"><div class="ph">${facade(l)}${l.age<2?'<span class="tag new">Nouveau</span>':l.fs.includes('meublé')?'<span class="tag">Meublé</span>':''}<button class="heart ${S.fav.has(l.id)?'on':''}" aria-label="Ajouter aux favoris"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#111" stroke-width="2"/></svg></button></div><div class="ci"><div class="pr bric">${prix(l)}</div><div class="t">${l.titre}</div><div class="s"><span>${l.q}</span><span>${l.surf} m²</span>${l.ch?`<span>${l.ch} ch.</span>`:''}</div></div></article>`).join(''):'<div class="empty" style="grid-column:1/-1">Aucun bien ne correspond. Élargissez le budget ou retirez un filtre.</div>';
+  $('#pins').innerHTML=a.map(l=>{const t=l.tr==='location'?(l.pr>=1e6?F(l.pr/1e6)+' M':Math.round(l.pr/1000)+' k'):F(l.pr/1e6)+' M',w=t.length*7.4+18;return`<g class="pin ${S.fav.has(l.id)?'fav':''}" data-id="${l.id}" transform="translate(${l.x},${l.y})"><rect x="${-w/2}" y="-26" width="${w}" height="24" rx="12"/><path d="M-5 -3L0 4L5 -3" fill="#111"/><text text-anchor="middle" y="-9.5">${t}</text></g>`}).join('');
+  $('#favN').textContent=S.fav.size;$('#favB').style.background=S.favOnly?'#111':'';$('#favB').style.color=S.favOnly?'#fff':'';
+  $('#zoneInfo').textContent=S.area?'Zone filtrée · ':'';if(S.area)$('#zoneInfo').innerHTML='<a href="#" id="clrA" style="color:var(--acc);font-weight:600">Effacer la zone</a>'}
+function hl(id,on){$$(`.card[data-id="${id}"]`).forEach(c=>c.classList.toggle('hl',on));const p=$(`.pin[data-id="${id}"]`);if(p){p.classList.toggle('on',on);if(on)p.parentNode.appendChild(p)}}
+
+// ——— Interactions ———
+$('#tx').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.tr=b.dataset.v;$$('#tx button').forEach(x=>x.classList.toggle('on',x===b));budOpts();render()};
+$('#fType').onchange=e=>{S.type=e.target.value;render()};$('#fBud').onchange=e=>{S.bud=+e.target.value;render()};$('#fCh').onchange=e=>{S.ch=+e.target.value;render()};$('#sort').onchange=e=>{S.sort=e.target.value;render()};
+$$('.chip').forEach(c=>c.onclick=()=>{c.classList.toggle('on');S.fs.has(c.dataset.f)?S.fs.delete(c.dataset.f):S.fs.add(c.dataset.f);render()});
+$('#favB').onclick=()=>{S.favOnly=!S.favOnly;render()};
+$('#grid').addEventListener('mouseover',e=>{const c=e.target.closest('.card');if(c&&S.hl!==c.dataset.id){if(S.hl)hl(S.hl,false);S.hl=c.dataset.id;hl(S.hl,true)}});
+$('#grid').addEventListener('mouseleave',()=>{if(S.hl)hl(S.hl,false);S.hl=null});
+$('#grid').onclick=e=>{const c=e.target.closest('.card');if(!c)return;const id=+c.dataset.id;if(e.target.closest('.heart')){S.fav.has(id)?S.fav.delete(id):S.fav.add(id);localStorage.setItem('seuil-fav',JSON.stringify([...S.fav]));render();toast(S.fav.has(id)?'Ajouté aux favoris':'Retiré des favoris');return}open(id)};
+$('#pins')||0;
+$('#map').addEventListener('click',e=>{const p=e.target.closest('.pin');if(p&&!moved)open(+p.dataset.id);if(e.target.id==='clrA'){e.preventDefault();S.area=null;render()}});
+$('#map').addEventListener('mouseover',e=>{const p=e.target.closest('.pin');if(p){const c=$(`.card[data-id="${p.dataset.id}"]`);if(c){hl(p.dataset.id,true);c.scrollIntoView({block:'nearest',behavior:'smooth'})}}});
+$('#map').addEventListener('mouseout',e=>{const p=e.target.closest('.pin');if(p)hl(p.dataset.id,false)});
+// zoom & déplacement
+let V={x:0,y:0,k:1},moved=false;const setV=()=>{$('#world').setAttribute('transform',`translate(${V.x} ${V.y}) scale(${V.k})`);$('#areaB').style.display=V.k>1.05?'block':'none'};
+function zoomAt(f,cx=520,cy=380){const k=Math.min(3,Math.max(1,V.k*f));V.x=cx-(cx-V.x)*k/V.k;V.y=cy-(cy-V.y)*k/V.k;V.k=k;clamp();setV()}
+function clamp(){V.x=Math.min(150*(1-V.k),Math.max(970*(1-V.k),V.x));V.y=Math.min(0,Math.max(760-760*V.k,V.y))}
+$('#zin').onclick=()=>zoomAt(1.4);$('#zout').onclick=()=>zoomAt(1/1.4);
+const svgPt=e=>{const p=$('#msvg').createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform($('#msvg').getScreenCTM().inverse())};
+$('#map').addEventListener('wheel',e=>{e.preventDefault();const p=svgPt(e);zoomAt(e.deltaY<0?1.15:1/1.15,p.x,p.y)},{passive:false});
+let drag=null;$('#msvg').addEventListener('pointerdown',e=>{drag={p:svgPt(e),x:V.x,y:V.y};moved=false});
+addEventListener('pointermove',e=>{if(!drag)return;const p=svgPt(e);const dx=p.x-drag.p.x,dy=p.y-drag.p.y;if(Math.abs(dx)+Math.abs(dy)>4){moved=true;$('#map').classList.add('drag')}V.x=drag.x+dx;V.y=drag.y+dy;clamp();setV();drag.p=svgPt(e);drag.x=V.x;drag.y=V.y});
+addEventListener('pointerup',()=>{drag=null;$('#map').classList.remove('drag');setTimeout(()=>moved=false,0)});
+$('#areaB').onclick=()=>{S.area=[(150-V.x)/V.k,-V.y/V.k,(1000-V.x)/V.k,(760-V.y)/V.k];render();toast('Résultats limités à la zone visible')};
+
+// ——— Fiche ———
+function open(id){const l=L[id],isL=l.tr==='location';
+  const days=[...Array(6)].map((_,i)=>{const d=new Date(Date.now()+(i+1)*864e5);return d}).filter(d=>d.getDay());
+  $('#pan').innerHTML=`<button class="close" id="cls" aria-label="Fermer">✕</button><div class="hero">${facade(l,800,400)}</div><div class="fc">
+  <div class="pr">${prix(l)}</div><h2>${l.titre}</h2><div class="ad">${l.rue[0].toUpperCase()+l.rue.slice(1)}, ${l.q}, Douala${l.et?' · '+l.et+(l.et===1?'er':'e')+' étage':''}</div>
+  <div class="facts"><div><b>${l.surf} m²</b><span>surface</span></div><div><b>${l.ch+(l.type==='Bureau'?5:2)-(l.type==='Studio'?1:0)}</b><span>pièces</span></div><div><b>${l.ch||'—'}</b><span>chambres</span></div><div><b>${l.sdb}</b><span>salle${l.sdb>1?'s':''} d'eau</span></div></div>
+  <p style="color:#444;max-width:60ch">${l.type} ${l.adj} situé à ${l.q}, ${l.et?'au '+l.et+(l.et===1?'er':'e')+' étage d\'un immeuble '+(l.fs.includes('ascenseur')?'avec ascenseur':'sécurisé'):'sur une parcelle clôturée'}. ${l.fs.includes('groupe électrogène')?'Groupe électrogène partagé pour les coupures. ':''}${l.fs.includes('forage')?'Forage privé : eau disponible en continu. ':''}${isL?'Caution de 3 mois et 1 mois d\'avance à la signature. Visite possible cette semaine.':'Titre foncier disponible, frais de notaire estimés à 7 %. Visite sur rendez-vous.'}</p>
+  ${l.fs.length?`<h3>Équipements</h3><div class="feat">${l.fs.map(f=>`<span>${f[0].toUpperCase()+f.slice(1)}</span>`).join('')}</div>`:''}
+  <h3>Plan indicatif</h3><div class="plan">${plan(l)}</div>
+  <h3>${isL?'Budget d\'entrée':'Simulateur de crédit'}</h3><div class="sim" id="sim"></div>
+  <h3>Demander une visite</h3><form class="visit" id="vf"><div class="slots" id="slots">${days.map((d,i)=>`<button type="button" class="${i?'':'on'}">${d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}<br><b>${['9 h','11 h','15 h','17 h'][i%4]}</b></button>`).join('')}</div><input required placeholder="Votre nom" aria-label="Nom"><input required placeholder="Téléphone / WhatsApp" aria-label="Téléphone" inputmode="tel"><button>Confirmer la demande de visite</button></form>
+  <div class="agent"><i>AE</i><div><b>Aïcha Etoundi</b><br><span style="color:var(--mute);font-size:13px">Conseillère Seuil · ${l.q} · répond en moins d'une heure</span></div></div></div>`;
+  sim(l);$('#sheet').classList.add('on');$('#pan').scrollTop=0;
+  $('#cls').onclick=$('#veil').onclick=()=>$('#sheet').classList.remove('on');
+  $('#slots').onclick=e=>{const b=e.target.closest('button');if(b)$$('#slots button').forEach(x=>x.classList.toggle('on',x===b))};
+  $('#vf').onsubmit=e=>{e.preventDefault();$('#sheet').classList.remove('on');toast('Visite demandée : Aïcha vous confirme par WhatsApp')}}
+function sim(l){const el=$('#sim');
+  if(l.tr==='location'){el.innerHTML=`<label>Mois de caution <b id="cv">3</b><input type="range" min="1" max="6" value="3" id="cau"></label><label>Mois d'avance <b id="av">1</b><input type="range" min="1" max="12" value="1" id="ava"></label><div class="bar2" id="b2"></div><div class="res"><span>À prévoir à la signature<br><small style="color:var(--mute)">caution + avance + frais d'agence (1 mois)</small></span><b id="tot"></b></div>`;
+    const up=()=>{const c=+$('#cau').value,a=+$('#ava').value;$('#cv').textContent=c;$('#av').textContent=a;$('#tot').textContent=F(l.pr*(c+a+1))+' F';$('#b2').innerHTML=`<i style="flex:${c};background:#111"></i><i style="flex:${a};background:var(--acc)"></i><i style="flex:1;background:#c9c2b4"></i>`};el.oninput=up;up()}
+  else{el.innerHTML=`<label>Apport <b id="apv"></b><input type="range" min="10" max="60" value="30" step="5" id="ap"></label><label>Durée <b id="duv"></b><input type="range" min="5" max="25" value="15" id="du"></label><label>Taux annuel <b id="tav"></b><input type="range" min="6" max="12" value="8.5" step=".25" id="ta"></label><div class="bar2" id="b2"></div><div class="res"><span>Mensualité estimée<br><small style="color:var(--mute)" id="cr"></small></span><b id="tot"></b></div>`;
+    const up=()=>{const ap=+$('#ap').value/100,n=+$('#du').value*12,t=+$('#ta').value/1200,cap=l.pr*(1-ap),m=cap*t/(1-Math.pow(1+t,-n)),int=m*n-cap;
+      $('#apv').textContent=Math.round(ap*100)+' % · '+F(l.pr*ap/1e6)+' M F';$('#duv').textContent=$('#du').value+' ans';$('#tav').textContent=String($('#ta').value).replace('.',',')+' %';$('#tot').textContent=F(m)+' F / mois';$('#cr').textContent=`emprunt ${F(cap/1e6)} M F · intérêts ${F(int/1e6)} M F`;
+      $('#b2').innerHTML=`<i style="flex:${l.pr*ap};background:#111"></i><i style="flex:${cap};background:var(--acc)"></i><i style="flex:${int};background:#c9c2b4"></i>`};el.oninput=up;up()}}
+function toast(t){$('#toast').textContent=t;$('#toast').classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>$('#toast').classList.remove('on'),2400)}
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#sheet').classList.remove('on')});
+drawMap();budOpts();render();
+</script>
+</body>
+</html>

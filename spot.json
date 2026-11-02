@@ -1,0 +1,96 @@
+{
+ "titre": "<em>Seuil</em>, annonces immobilières",
+ "type": "Plateforme immobilière",
+ "sous_titre": "Carte interactive, filtres, plans, simulateur de crédit, visites",
+ "couleur": "#111111",
+ "graine": 11,
+ "voix": [
+  [
+   3.3,
+   "Seuil, une plateforme d'annonces immobilières à Douala,"
+  ],
+  [
+   8.4,
+   "la carte et la liste se répondent, les filtres s'appliquent en direct,"
+  ],
+  [
+   15.2,
+   "chaque bien a son plan, son simulateur de crédit, et la visite se réserve en un geste."
+  ]
+ ],
+ "etapes": [
+  {
+   "t": "wait",
+   "ms": 500
+  },
+  {
+   "t": "hover",
+   "sel": ".card:nth-child(3)",
+   "pause": 700
+  },
+  {
+   "t": "click",
+   "sel": "#tx button[data-v=vente]",
+   "pause": 900
+  },
+  {
+   "t": "click",
+   "sel": ".chip[data-f=forage]",
+   "pause": 800
+  },
+  {
+   "t": "click",
+   "sel": "#zin",
+   "pause": 500
+  },
+  {
+   "t": "click",
+   "sel": ".card:nth-child(1)",
+   "pause": 800
+  },
+  {
+   "t": "eval",
+   "js": "document.querySelector('#pan').scrollTo({top:1000,behavior:'smooth'})",
+   "pause": 1500
+  },
+  {
+   "t": "eval",
+   "js": "const r=document.querySelector('#ap');r.value=45;r.dispatchEvent(new Event('input',{bubbles:true}))",
+   "pause": 700
+  },
+  {
+   "t": "eval",
+   "js": "const r=document.querySelector('#du');r.value=20;r.dispatchEvent(new Event('input',{bubbles:true}))",
+   "pause": 900
+  },
+  {
+   "t": "eval",
+   "js": "document.querySelector('#pan').scrollTo({top:9999,behavior:'smooth'})",
+   "pause": 700
+  },
+  {
+   "t": "click",
+   "sel": "#slots button:nth-child(3)",
+   "pause": 300
+  },
+  {
+   "t": "type",
+   "sel": "#vf input[placeholder='Votre nom']",
+   "text": "Serge Mbappé",
+   "delay": 30,
+   "pause": 100
+  },
+  {
+   "t": "type",
+   "sel": "#vf input[inputmode=tel]",
+   "text": "690112233",
+   "delay": 20,
+   "pause": 150
+  },
+  {
+   "t": "click",
+   "sel": "#vf > button",
+   "pause": 1300
+  }
+ ]
+}
